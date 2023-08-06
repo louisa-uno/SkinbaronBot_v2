@@ -2,7 +2,7 @@ import tarfile
 import os
 
 
-def create_tar_archive(output_file, needed_files):
+def create_tar_archive(output_file):
 	# Get the directory containing the script as the build context
 	script_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,4 +27,4 @@ output_filename = "skinbaron.tar"
 needed_files = ["Dockerfile", "requirements.txt", "skinbaron.py"]
 
 # Create the tar archive
-create_tar_archive(output_filename, needed_files)
+create_tar_archive(output_filename)

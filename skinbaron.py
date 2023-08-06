@@ -11,8 +11,7 @@ logging.basicConfig(level=logging.INFO,
 def load_config():
 	"""Load the configuration from config.json"""
 	with open('config.json', 'r') as configFile:
-		config = json.load(configFile)
-	return config
+		return json.load(configFile)
 
 
 def account_get_balance():
