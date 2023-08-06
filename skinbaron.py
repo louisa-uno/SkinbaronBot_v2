@@ -128,15 +128,15 @@ def buy_offers_search(enabled: bool = True,
 	else:
 		logging.info("No offers bought")
 
+if __name__ == "__main__":
+	config = load_config()
+	apikey = config["apikey"]
+	iteration = 1
 
-config = load_config()
-apikey = config["apikey"]
-iteration = 1
-
-while True:
-	logging.info("Iteration: %s", iteration)
-	account_get_balance()
-	for buying in config["buying"]:
-		buy_offers_search(**buying)
-	time.sleep(config["interval"])
-	iteration += 1
+	while True:
+		logging.info("Iteration: %s", iteration)
+		account_get_balance()
+		for buying in config["buying"]:
+			buy_offers_search(**buying)
+		time.sleep(config["interval"])
+		iteration += 1
