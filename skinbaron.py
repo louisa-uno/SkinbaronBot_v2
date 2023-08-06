@@ -97,7 +97,8 @@ def buy_offers_search(enabled=True,
                       items_per_page=0,
                       max_buy=0,
                       max_buy_total=0):
-	if not enabled: return
+	if not enabled:
+		return
 	offers = offers_search(appid=appid,
 	                       search_item=search_item,
 	                       min_search=min_search,
