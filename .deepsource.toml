@@ -10,7 +10,3 @@ runtime_version = "3.11.4"
 [[analyzers]]
 name = "docker"
 enabled = true
-
-[[analyzers]]
-name = "test-coverage"
-enabled = true
