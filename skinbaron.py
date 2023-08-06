@@ -28,7 +28,7 @@ def account_get_balance():
 	response = requests.request("POST", url, headers=headers, data=payload)
 	response_json = response.json()
 	balance = response_json["balance"]
-	logging.info("Balance: {} €".format(balance))
+	logging.info("Balance: %s €", balance)
 	return balance
 
 
@@ -61,7 +61,7 @@ def offers_search(appid=0,
 	response = requests.request("POST", url, headers=headers, data=payload)
 	response_json = response.json()
 	offers = response_json["sales"]
-	logging.info("Returned {} offers".format(len(offers)))
+	logging.info("Returned %s offers", len(offers))
 	return offers
 
 
@@ -83,7 +83,7 @@ def offers_buyitems(buy_offer_ids, total):
 	# Send the request to the API
 	response = requests.request("POST", url, headers=headers, data=payload)
 	response_json = response.json()
-	logging.info("Bought {} items".format(len(response_json["items"])))
+	logging.info("Bought %s items", len(response_json["items"]))
 	return response_json["items"]
 
 
@@ -110,16 +110,16 @@ def buy_offers_search(enabled=True,
 	total = 0
 	for offer in offers:
 		if offer["price"] <= max_buy:
-			logging.info("Buying offer: {} - {} €".format(
-			    offer["market_name"], offer["price"]))
+			logging.info("Buying offer: %s - %s €", offer["market_name"],
+			             offer["price"])
 			buy_offer_ids.append(offer["id"])
 			total += offer["price"]
 		else:
-			logging.info("Offer too expensive: {} - {} €".format(
-			    offer["market_name"], offer["price"]))
+			logging.info("Offer too expensive: %s - %s €",
+			             offer["market_name"], offer["price"])
 	if total > 0:
 		if total > max_buy_total:
-			logging.info("Total too expensive: {} €".format(total))
+			logging.info("Total too expensive: %s €", total)
 		else:
 			offers_buyitems(buy_offer_ids, total)
 	else:
@@ -131,7 +131,7 @@ apikey = config["apikey"]
 iteration = 1
 
 while True:
-	logging.info("Iteration: {}".format(iteration))
+	logging.info("Iteration: %s", iteration)
 	account_get_balance()
 	for buying in config["buying"]:
 		buy_offers_search(**buying)
