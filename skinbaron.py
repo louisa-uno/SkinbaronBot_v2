@@ -97,6 +97,7 @@ def buy_offers_search(enabled=True,
                       items_per_page=0,
                       max_buy=0,
                       max_buy_total=0):
+	"""Buy offers on SkinBaron"""
 	if not enabled:
 		return
 	offers = offers_search(appid=appid,

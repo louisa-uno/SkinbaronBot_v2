@@ -3,6 +3,11 @@ import os
 
 
 def create_tar_archive(output_file):
+	"""Create a tar archive containing all files in the build context.
+
+	Args:
+		output_file (str): The name of the output tar archive.
+	"""
 	# Get the directory containing the script as the build context
 	script_directory = os.path.dirname(os.path.abspath(__file__))
 
