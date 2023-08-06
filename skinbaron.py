@@ -27,7 +27,7 @@ def account_get_balance():
 	# Send the request to the API
 	response = requests.request("POST", url, headers=headers, data=payload)
 	response_json = response.json()
-	balance = response.json()["balance"]
+	balance = response_json["balance"]
 	logging.info("Balance: {} €".format(balance))
 	return balance
 
