@@ -110,16 +110,16 @@ def buy_offers_search(enabled=True,
 	total = 0
 	for offer in offers:
 		if offer["price"] <= max_buy:
-			logging.info("Buying offer: {} - {}€".format(
+			logging.info("Buying offer: {} - {} €".format(
 			    offer["market_name"], offer["price"]))
 			buy_offer_ids.append(offer["id"])
 			total += offer["price"]
 		else:
-			logging.info("Offer too expensive: {} - {}€".format(
+			logging.info("Offer too expensive: {} - {} €".format(
 			    offer["market_name"], offer["price"]))
 	if total > 0:
 		if total > max_buy_total:
-			logging.info("Total too expensive: {}€".format(total))
+			logging.info("Total too expensive: {} €".format(total))
 		else:
 			offers_buyitems(buy_offer_ids, total)
 	else:
