@@ -31,15 +31,19 @@ jobs:
           username: ${{ secrets.GIT_USERNAME }}
           password: ${{ secrets.GIT_TOKEN }}
 
+      - name: Extract Version Tag
+        id: extract_tag
+        run: echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: |
-            luois45/skinbaronbot_v2:${{ github.ref }}
+            luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
             luois45/skinbaronbot_v2:latest
-            ghcr.io/luois45/skinbaronbot_v2:${{ github.ref }}
+            ghcr.io/luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
             ghcr.io/luois45/skinbaronbot_v2:latest
 
       - name: Update Hub Description
