@@ -34,8 +34,8 @@ def account_get_balance():
 
 def offers_search(appid=0,
                   search_item="string",
-                  min=0,
-                  max=0,
+                  min_search=0,
+                  max_search=0,
                   tradelocked=True,
                   after_saleid="string",
                   items_per_page=0):
@@ -46,8 +46,8 @@ def offers_search(appid=0,
 	    "apikey": apikey,
 	    "appid": appid,
 	    "search_item": search_item,
-	    "min": min,
-	    "max": max,
+	    "min": min_search,
+	    "max": max_search,
 	    "tradelocked": tradelocked,
 	    "after_saleid": after_saleid,
 	    "items_per_page": items_per_page
@@ -90,25 +90,25 @@ def offers_buyitems(buy_offer_ids, total):
 def buy_offers_search(enabled=True,
                       appid=0,
                       search_item="string",
-                      min=0,
-                      max=0,
+                      min_search=0,
+                      max_search=0,
                       tradelocked=True,
                       after_saleid="string",
                       items_per_page=0,
-                      max_buying=0,
-                      max_buying_total=0):
+                      max_buy=0,
+                      max_buy_total=0):
 	if not enabled: return
 	offers = offers_search(appid=appid,
 	                       search_item=search_item,
-	                       min=min,
-	                       max=max,
+	                       min_search=min_search,
+	                       max_search=max_search,
 	                       tradelocked=tradelocked,
 	                       after_saleid=after_saleid,
 	                       items_per_page=items_per_page)
 	buy_offer_ids = []
 	total = 0
 	for offer in offers:
-		if offer["price"] <= max_buying:
+		if offer["price"] <= max_buy:
 			logging.info("Buying offer: {} - {}€".format(
 			    offer["market_name"], offer["price"]))
 			buy_offer_ids.append(offer["id"])
@@ -117,7 +117,7 @@ def buy_offers_search(enabled=True,
 			logging.info("Offer too expensive: {} - {}€".format(
 			    offer["market_name"], offer["price"]))
 	if total > 0:
-		if total > max_buying_total:
+		if total > max_buy_total:
 			logging.info("Total too expensive: {}€".format(total))
 		else:
 			offers_buyitems(buy_offer_ids, total)
