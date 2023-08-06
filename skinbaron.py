@@ -120,13 +120,10 @@ def buy_offers_search(enabled=True,
 	if total > 0:
 		if total > max_buying_total:
 			logging.info("Total too expensive: {}€".format(total))
-			return
 		else:
 			offers_buyitems(buy_offer_ids, total)
-			return
 	else:
 		logging.info("No offers bought")
-		return
 
 
 config = load_config()
