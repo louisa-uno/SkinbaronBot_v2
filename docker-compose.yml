@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  bot:
+    image: luois45/skinbaronbot_v2:latest
+    restart: on-failure
+    configs:
+      - source: config
+        target: /usr/src/app/config.json
+configs:
+  config:
+    external:
+      name: skinbaronbot-config

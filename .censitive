@@ -1,0 +1,2 @@
+# Censor the apikey in config.json
+config.json:apikey

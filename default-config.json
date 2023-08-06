@@ -1,0 +1,22 @@
+{
+    "apikey": "Your API Key",
+    "interval": 60,
+    "buying": [
+        {
+            "enabled": false,
+            "appid": 730,
+            "search_item": "Musikkit",
+            "max": 1.1,
+            "max_buying": 1,
+            "max_buying_total": 10
+        },
+        {
+            "enabled": false,
+            "appid": 730,
+            "search_item": "StatTrak™-Austauschwerkzeug",
+            "max": 0.5,
+            "max_buying": 0.4,
+            "max_buying_total": 4
+        }
+    ]
+}
