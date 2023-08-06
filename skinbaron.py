@@ -8,13 +8,14 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def load_config():
+def load_config() -> dict:
 	"""Load the configuration from config.json"""
 	with open('config.json', 'r') as configFile:
 		return json.load(configFile)
 
 
-def account_get_balance():
+
+def account_get_balance() -> float:
 	"""Get the balance from SkinBaron"""
 	# Set up the API URL and payload
 	url = "https://api.skinbaron.de/GetBalance"
@@ -27,18 +28,18 @@ def account_get_balance():
 	# Send the request to the API
 	response = requests.request("POST", url, headers=headers, data=payload)
 	response_json = response.json()
-	balance = response_json["balance"]
+	balance = float(response_json["balance"])
 	logging.info("Balance: %s €", balance)
 	return balance
 
 
-def offers_search(appid=0,
-                  search_item="string",
-                  min_search=0,
-                  max_search=0,
-                  tradelocked=True,
-                  after_saleid="string",
-                  items_per_page=0):
+def offers_search(appid: int = 0,
+                  search_item: str = "string",
+                  min_search = 0,
+                  max_search = 0,
+                  tradelocked: bool = True,
+                  after_saleid: str = "string",
+                  items_per_page: int = 0) -> list:
 	"""Search for offers on SkinBaron"""
 	# Set up the API URL and payload
 	url = "https://api.skinbaron.de/SearchOffers"
@@ -65,7 +66,7 @@ def offers_search(appid=0,
 	return offers
 
 
-def offers_buyitems(buy_offer_ids, total):
+def offers_buyitems(buy_offer_ids: list, total) -> list:
 	"""Buy items on SkinBaron"""
 	# Set up the API URL and payload
 	url = "https://api.skinbaron.de/BuyItems"
@@ -84,19 +85,20 @@ def offers_buyitems(buy_offer_ids, total):
 	response = requests.request("POST", url, headers=headers, data=payload)
 	response_json = response.json()
 	logging.info("Bought %s items", len(response_json["items"]))
-	return response_json["items"]
+	items = response_json["items"]
+	return items
 
 
-def buy_offers_search(enabled=True,
-                      appid=0,
-                      search_item="string",
-                      min_search=0,
-                      max_search=0,
-                      tradelocked=True,
-                      after_saleid="string",
-                      items_per_page=0,
-                      max_buy=0,
-                      max_buy_total=0):
+def buy_offers_search(enabled: bool = True,
+                      appid: int = 0,
+                      search_item: str = "string",
+                      min_search = 0,
+                      max_search = 0,
+                      tradelocked: bool = True,
+                      after_saleid: str = "string",
+                      items_per_page: int = 0,
+                      max_buy = 0,
+                      max_buy_total = 0) -> None:
 	"""Buy offers on SkinBaron"""
 	if not enabled:
 		return
