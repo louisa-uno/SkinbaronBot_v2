@@ -1,5 +1,6 @@
 {
-    "apikey": "Your API Key",
+    "apikey": "YOUR_SKINBARON_API_KEY",
+    "discord_webhook": "YOUR_DISCORD_WEBHOOK_URL",
     "interval": 60,
     "buying": [
         {

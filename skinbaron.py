@@ -14,6 +14,38 @@ def load_config() -> dict:
 		return json.load(configFile)
 
 
+def send_discord_embed(items: list):
+    """Send an embed to Discord containing bought items information."""
+    webhook_url = config.get("discord_webhook")
+    
+    # If webhook_url is None or empty, return early
+    if not webhook_url:
+        logging.warning("Discord webhook URL not found in config. Skipping sending message to Discord.")
+        return
+    
+    # Construct the embed
+    embeds = [{
+        "title": "Items Bought",
+        "description": "\n".join([f"Item: {item['name']} - Price: {item['price']}" for item in items]),
+        "color": 10233776 # Corresponding to RGB(156,39,176) or #9C27B0
+    }]
+    
+    payload = {
+        "content": "New items have been bought!",
+        "embeds": embeds,
+        "username": "SkinbaronBot_v2 by Louis_45"
+    }
+
+    headers = {
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.post(webhook_url, json=payload, headers=headers)
+
+	# Log an error if the request failed
+    if response.status_code != 204:
+        logging.error("Failed to send message to Discord. Status Code: %s", response.status_code)
+
 
 def account_get_balance() -> float:
 	"""Get the balance from SkinBaron"""
@@ -86,6 +118,10 @@ def offers_buyitems(buy_offer_ids: list, total) -> list:
 	response_json = response.json()
 	logging.info("Bought %s items", len(response_json["items"]))
 	items = response_json["items"]
+	
+	# Send a message to the Discord webhook
+	send_discord_embed(items)
+ 
 	return items
 
 
