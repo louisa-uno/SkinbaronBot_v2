@@ -2,6 +2,8 @@ import json
 import logging
 import requests
 import time
+import re
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -13,6 +15,8 @@ def load_config() -> dict:
 	with open('config.json', 'r') as configFile:
 		return json.load(configFile)
 
+def matches_pattern(value, pattern):
+    return bool(re.search(pattern, str(value)))
 
 def send_discord_embed(items: list, total):
 	"""Send an embed to Discord containing bought items information."""
@@ -141,7 +145,9 @@ def buy_offers_search(enabled: bool = True,
 					  after_saleid: str = "string",
 					  items_per_page: int = 0,
 					  max_buy = 0,
-					  max_buy_total = 0) -> None:
+					  max_buy_total = 0,
+       				  positive_regex = None,
+             		  negative_regex = None) -> None:
 	"""Buy offers on SkinBaron"""
 	if not enabled:
 		return
@@ -156,6 +162,15 @@ def buy_offers_search(enabled: bool = True,
 	total = 0
 	for offer in offers:
 		if offer["price"] <= max_buy:
+			if positive_regex:
+				if not matches_pattern(offer["market_name"], positive_regex):
+					logging.info("Offer does not match positive regex: %s - %s €",
+								 offer["market_name"], offer["price"])
+					continue
+			if negative_regex:
+				if matches_pattern(offer["market_name"], negative_regex):
+					logging.info("Offer matches negative regex: %s - %s €", offer["market_name"], offer["price"])
+					continue
 			logging.info("Buying offer: %s - %s €", offer["market_name"],
 						 offer["price"])
 			buy_offer_ids.append(offer["id"])

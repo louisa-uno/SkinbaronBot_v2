@@ -18,6 +18,16 @@
             "max_search": 0.5,
             "max_buy": 0.4,
             "max_buy_total": 4
+        },
+        {
+            "enabled": true,
+            "appid": 730,
+            "search_item": "Sticker",
+            "max_search": 0.06,
+            "max_buy": 1,
+            "max_buy_total": 0.3,
+            "positive_regex": "202[0-9]",
+            "negative_regex": "201[0-9]"
         }
     ]
 }
