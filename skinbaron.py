@@ -10,13 +10,9 @@ logging.basicConfig(level=logging.INFO,
 					format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-def load_config() -> dict:
-	"""Load the configuration from config.json"""
-	with open('config.json', 'r') as configFile:
-		return json.load(configFile)
-
 def matches_pattern(value, pattern):
-    return bool(re.search(pattern, str(value)))
+	return bool(re.search(pattern, str(value)))
+
 
 def send_discord_embed(items: list, total):
 	"""Send an embed to Discord containing bought items information."""
@@ -54,63 +50,12 @@ def send_discord_embed(items: list, total):
 		logging.error("Failed to send message to Discord. Status Code: %s", response.status_code)
 
 
-def account_get_balance() -> float:
-	"""Get the balance from SkinBaron"""
-	# Set up the API URL and payload
-	url = "https://api.skinbaron.de/GetBalance"
-	payload = json.dumps({"apikey": apikey})
-	headers = {
-		'Content-Type': 'application/json',
-		'x-requested-with': 'XMLHttpRequest'
-	}
-
-	# Send the request to the API
-	response = requests.request("POST", url, headers=headers, data=payload)
-	response_json = response.json()
-	balance = float(response_json["balance"])
-	logging.info("Balance: %s €", balance)
-	return balance
-
-
-def offers_search(appid: int = 0,
-				  search_item: str = "string",
-				  min_search = 0,
-				  max_search = 0,
-				  tradelocked: bool = True,
-				  after_saleid: str = "string",
-				  items_per_page: int = 0) -> list:
-	"""Search for offers on SkinBaron"""
-	# Set up the API URL and payload
-	url = "https://api.skinbaron.de/SearchOffers"
-	payload = json.dumps({
-		"apikey": apikey,
-		"appid": appid,
-		"search_item": search_item,
-		"min": min_search,
-		"max": max_search,
-		"tradelocked": tradelocked,
-		"after_saleid": after_saleid,
-		"items_per_page": items_per_page
-	})
-	headers = {
-		'Content-Type': 'application/json',
-		'x-requested-with': 'XMLHttpRequest'
-	}
-
-	# Send the request to the API
-	response = requests.request("POST", url, headers=headers, data=payload)
-	response_json = response.json()
-	offers = response_json["sales"]
-	logging.info("Returned %s offers", len(offers))
-	return offers
-
-
 def offers_buyitems(buy_offer_ids: list, total) -> list:
 	"""Buy items on SkinBaron"""
 	# Set up the API URL and payload
 	url = "https://api.skinbaron.de/BuyItems"
 	payload = json.dumps({
-		"apikey": apikey,
+		"apikey": config.apikey,
 		"total": total,
 		"toInventory": True,
 		"saleids": buy_offer_ids
@@ -136,65 +81,145 @@ def offers_buyitems(buy_offer_ids: list, total) -> list:
 	return items
 
 
-def buy_offers_search(enabled: bool = True,
-					  appid: int = 0,
-					  search_item: str = "string",
-					  min_search = 0,
-					  max_search = 0,
-					  tradelocked: bool = True,
-					  after_saleid: str = "string",
-					  items_per_page: int = 0,
-					  max_buy = 0,
-					  max_buy_total = 0,
-       				  positive_regex = None,
-             		  negative_regex = None) -> None:
-	"""Buy offers on SkinBaron"""
-	if not enabled:
-		return
-	offers = offers_search(appid=appid,
-						   search_item=search_item,
-						   min_search=min_search,
-						   max_search=max_search,
-						   tradelocked=tradelocked,
-						   after_saleid=after_saleid,
-						   items_per_page=items_per_page)
-	buy_offer_ids = []
-	total = 0
-	for offer in offers:
-		if offer["price"] <= max_buy:
-			if positive_regex:
-				if not matches_pattern(offer["market_name"], positive_regex):
-					logging.info("Offer does not match positive regex: %s - %s €",
-								 offer["market_name"], offer["price"])
-					continue
-			if negative_regex:
-				if matches_pattern(offer["market_name"], negative_regex):
-					logging.info("Offer matches negative regex: %s - %s €", offer["market_name"], offer["price"])
-					continue
-			logging.info("Buying offer: %s - %s €", offer["market_name"],
-						 offer["price"])
-			buy_offer_ids.append(offer["id"])
-			total += offer["price"]
+class Offer:
+	def __init__(self, api_offer):
+		self.id = api_offer["id"]
+		self.price = api_offer["price"]
+		self.img = api_offer["img"]
+		self.market_name = api_offer["market_name"]
+		self.sbinspect = api_offer["sbinspect"]
+		try:
+			self.inspect = api_offer["inspect"]
+		except KeyError:
+			self.inspect = None
+		self.app_id = api_offer["appid"]
+	def __str__(self):
+		return f"{self.market_name} - {self.price} €"
+
+
+class Search:
+	def __init__(self, searchConfig):
+		self.json = searchConfig
+		
+		def get_and_pop(key, default):
+			return self.json.pop(key, default)
+		
+		self.enabled = get_and_pop("enabled", False)
+		self.appid = get_and_pop("appid", 0)
+		self.search_item = get_and_pop("search_item", "string")
+		self.min_search = get_and_pop("min_search", 0)
+		self.max_search = get_and_pop("max_search", 0)
+		self.tradelocked = get_and_pop("tradelocked", True)
+		self.after_saleid = get_and_pop("after_saleid", "string")
+		self.items_per_page = get_and_pop("items_per_page", 0)
+		self.max_buy = get_and_pop("max_buy", 0)
+		self.max_buy_total = get_and_pop("max_buy_total", 0)
+		self.positive_regex = get_and_pop("positive_regex", None)
+		self.negative_regex = get_and_pop("negative_regex", None)
+		
+		if self.json:
+			print("Some config parameters couldn't get processed. Exiting...")
+			exit()
+			
+	def offers_search(self) -> list:
+		"""Search for offers on SkinBaron"""
+		# Set up the API URL and payload
+		url = "https://api.skinbaron.de/SearchOffers"
+		payload = json.dumps({
+			"apikey": config.apikey,
+			"appid": self.appid,
+			"search_item": self.search_item,
+			"min": self.min_search,
+			"max": self.max_search,
+			"tradelocked": self.tradelocked,
+			"after_saleid": self.after_saleid,
+			"items_per_page": self.items_per_page
+		})
+		headers = {
+			'Content-Type': 'application/json',
+			'x-requested-with': 'XMLHttpRequest'
+		}
+
+		# Send the request to the API
+		response = requests.request("POST", url, headers=headers, data=payload)
+		response_json = response.json()
+		offers = response_json["sales"]
+		logging.info("Returned %s offers", len(offers))
+		return offers
+   
+	def buy_offers(self) -> None:
+		"""Buy offers on SkinBaron"""
+		if not self.enabled:
+			return
+		offers = self.offers_search()
+		buy_offer_ids = []
+		total = 0
+		for offer in offers:
+			offer = Offer(offer)
+			if offer.price <= self.max_buy:
+				if self.positive_regex:
+					if not matches_pattern(offer.market_name, self.positive_regex):
+						logging.info("Offer does not match positive regex: " + str(offer))
+						continue
+				if self.negative_regex:
+					if matches_pattern(offer.market_name, self.negative_regex):
+						logging.info("Offer matches negative regex: " + str(offer))
+						continue
+				logging.info("Buying offer: " + str(offer))
+				buy_offer_ids.append(offer.id)
+				total += offer.price
+			else:
+				logging.info("Offer too expensive: " + str(offer))
+		if total > 0:
+			if total > self.max_buy_total:
+				logging.info("Total too expensive: %s €", total)
+			else:
+				offers_buyitems(buy_offer_ids, total)
 		else:
-			logging.info("Offer too expensive: %s - %s €",
-						 offer["market_name"], offer["price"])
-	if total > 0:
-		if total > max_buy_total:
-			logging.info("Total too expensive: %s €", total)
-		else:
-			offers_buyitems(buy_offer_ids, total)
-	else:
-		logging.info("No offers bought")
+			logging.info("No offers bought")
+
+
+class Config:
+	def __init__(self):
+
+		def load_file() -> dict:
+			"""Load the configuration from config.json"""
+			with open('config.json', 'r') as configFile:
+				return json.load(configFile)
+
+		self.json = load_file()
+		self.apikey = self.json["apikey"]
+		self.discord_webhook = self.json["discord_webhook"]
+		self.interval = self.json["interval"]
+		self.searches = []
+		for searchConfig in self.json["buying"]:
+			self.searches.append(Search(searchConfig))
+	
+	def print_balance(self) -> float:
+		"""Get the balance from SkinBaron"""
+		# Set up the API URL and payload
+		url = "https://api.skinbaron.de/GetBalance"
+		payload = json.dumps({"apikey": self.apikey})
+		headers = {
+			'Content-Type': 'application/json',
+			'x-requested-with': 'XMLHttpRequest'
+		}
+
+		# Send the request to the API
+		response = requests.request("POST", url, headers=headers, data=payload)
+		response_json = response.json()
+		balance = float(response_json["balance"])
+		logging.info("Balance: %s €", balance)
+		return balance
+
 
 if __name__ == "__main__":
-	config = load_config()
-	apikey = config["apikey"]
+	config = Config()
 	iteration = 1
-
 	while True:
 		logging.info("Iteration: %s", iteration)
-		account_get_balance()
-		for buying in config["buying"]:
-			buy_offers_search(**buying)
-		time.sleep(config["interval"])
+		config.print_balance()
+		for search in config.searches:
+			search.buy_offers()
+		time.sleep(config.interval)
 		iteration += 1
