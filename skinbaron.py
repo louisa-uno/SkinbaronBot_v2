@@ -16,10 +16,8 @@ def matches_pattern(value, pattern):
 
 def send_discord_embed(items: list, total):
 	"""Send an embed to Discord containing bought items information."""
-	webhook_url = config.get("discord_webhook")
-
 	# If webhook_url is None or empty, return early
-	if not webhook_url:
+	if not config.discord_webhook:
 		logging.warning("Discord webhook URL not found in config. Skipping sending message to Discord.")
 		return
 
@@ -43,7 +41,7 @@ def send_discord_embed(items: list, total):
 		'Content-Type': 'application/json',
 	}
 
-	response = requests.post(webhook_url, json=payload, headers=headers)
+	response = requests.post(config.discord_webhook, json=payload, headers=headers)
 
 	# Log an error if the request failed
 	if response.status_code != 204:
