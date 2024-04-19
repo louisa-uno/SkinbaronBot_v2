@@ -1,11 +1,9 @@
-name: Docker Image Build and Push
+name: Docker Image Release
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -33,14 +31,18 @@ jobs:
           username: ${{ secrets.GIT_USERNAME }}
           password: ${{ secrets.GIT_TOKEN }}
 
+      - name: Extract Version Tag
+        id: extract_tag
+        run: echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
           tags: |
-            luois45/skinbaronbot_v2:develop
-            ghcr.io/luois45/skinbaronbot_v2:develop
+            luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
+            ghcr.io/luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
 
       - name: Update Hub Description
         uses: peter-evans/dockerhub-description@v2
