@@ -1,2 +1,3 @@
 # Censor the apikey in config.json
 config.json:apikey
+config.json:discord_webhook
