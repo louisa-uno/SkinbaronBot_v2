@@ -1,4 +1,4 @@
-name: Docker Image Build and Push
+name: Docker Image - Develop
 
 on:
   push:
