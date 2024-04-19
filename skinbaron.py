@@ -18,7 +18,6 @@ def send_discord_embed(items: list, total):
 	"""Send an embed to Discord containing bought items information."""
 	# If webhook_url is None or empty, return early
 	if not config.discord_webhook:
-		logging.warning("Discord webhook URL not found in config. Skipping sending message to Discord.")
 		return
 
 	# Construct the embed
@@ -187,7 +186,14 @@ class Config:
 
 		self.json = load_file()
 		self.apikey = self.json["apikey"]
-		self.discord_webhook = self.json["discord_webhook"]
+		try:
+			self.discord_webhook = self.json["discord_webhook"]
+		except KeyError:
+			self.discord_webhook = None
+			logging.warning("No Discord webhook in the config. Continuing without it.")
+		if not self.discord_webhook.startswith("https://discord.com/api/webhooks/"):
+			self.discord_webhook = None
+			logging.warning("Discord Webhook in config is invalid. Continuing without it.")
 		self.interval = self.json["interval"]
 		self.searches = []
 		for searchConfig in self.json["buying"]:
