@@ -42,9 +42,7 @@ jobs:
           push: true
           tags: |
             luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
-            luois45/skinbaronbot_v2:latest
             ghcr.io/luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
-            ghcr.io/luois45/skinbaronbot_v2:latest
 
       - name: Update Hub Description
         uses: peter-evans/dockerhub-description@v2
