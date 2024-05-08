@@ -44,11 +44,3 @@ jobs:
             luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
             ghcr.io/luois45/skinbaronbot_v2:${{ env.VERSION_TAG }}
           platforms: linux/amd64, linux/arm64/v8, linux/arm/v7
-
-      - name: Update Hub Description
-        uses: peter-evans/dockerhub-description@v2
-        with:
-          username: luois45
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: luois45/skinbaronbot_v2
-          readme-filepath: ./DockerHub-README.md
